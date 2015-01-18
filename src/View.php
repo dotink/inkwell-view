@@ -325,7 +325,7 @@
 				? $this->root . DIRECTORY_SEPARATOR . $template . '.php'
 				: $template;
 
-			include $template;
+			require $template;
 		}
 
 
