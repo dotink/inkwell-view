@@ -19,7 +19,7 @@
 	*
 	* @package Dotink\Inkwell
 	*/
-	class View // implements Traversable, ArrayAccess, Serializable
+	class View implements ArrayAccess
 	{
 		/**
 		 *
@@ -163,7 +163,7 @@
 				});
 
 				if ($expand) {
-					for ($container = $this->container; $container; $container = $view->container) {
+					for ($container = $this->container; $container; $container = $container->container) {
 						$this->view = $container->compose();
 					}
 				}
@@ -196,7 +196,7 @@
 		 */
 		public function has($key)
 		{
-			return array_key_exists($element, $this);
+			return isset($this->data[$key]);
 		}
 
 
@@ -217,10 +217,19 @@
 		/**
 		 *
 		 */
+		public function offsetExists($key)
+		{
+			return isset($this->data[$key]);
+		}
+
+
+		/**
+		 *
+		 */
 		public function offsetGet($key)
 		{
-			return parent::offsetExists($key)
-				? parent::offsetGet($key)
+			return isset($this->data[$key])
+				? $this->data[$key]
 				: NULL;
 		}
 
@@ -230,9 +239,20 @@
 		 */
 		public function offsetSet($key, $value)
 		{
-			return $value !== NULL
-				? parent::offsetSet($key, $value)
-				: parent::offsetUnset($key);
+			if ($value === NULL) {
+				unset($this->data[$key]);
+			} else {
+				$this->data[$key] = $value;
+			}
+		}
+
+
+		/**
+		 *
+		 */
+		public function offsetUnset($key)
+		{
+			unset($this->data[$key]);
 		}
 
 
@@ -258,7 +278,6 @@
 
 			return $this;
 		}
-
 
 
 		/**
