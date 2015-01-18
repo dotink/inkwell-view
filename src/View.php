@@ -60,11 +60,6 @@
 		/**
 		 *
 		 */
-
-
-		/**
-		 *
-		 */
 		protected $view = NULL;
 
 
