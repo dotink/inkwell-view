@@ -1,2 +1,2 @@
-Simple PHP Views for inKWell
+Views for the inKWell Framework
 ============

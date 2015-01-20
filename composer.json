@@ -1,17 +1,17 @@
 {
 	"name": "dotink/inkwell-view",
-	"description": "Simple Views",
+	"description": "Views for the inKWell Framework",
 	"keywords": ["views", "html"],
 	"license": "AGPL 3.0",
 	"authors": [
 		{
 			"name": "Matthew J. Sahagian",
-			"email": "matt@imarc.net",
+			"email": "msahagian@dotink.org",
 			"role": "Developer"
 		}
 	],
 	"require": {
-		"php": ">=5.3.0"
+		"php": ">=5.4.0"
 	},
 	"autoload": {
 		"classmap": ["src/"]
