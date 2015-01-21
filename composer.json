@@ -2,18 +2,33 @@
 	"name": "dotink/inkwell-view",
 	"description": "Views for the inKWell Framework",
 	"keywords": ["views", "html"],
-	"license": "AGPL 3.0",
+	"license": "AGPL-3.0",
+	"type": "opus-package",
 	"authors": [
 		{
 			"name": "Matthew J. Sahagian",
 			"email": "msahagian@dotink.org",
-			"role": "Developer"
+			"role": "Lead Architect / Developer"
+		}
+	],
+	"repositories": [
+		{
+			"type": "composer",
+			"url": "http://packages.dotink.org"
 		}
 	],
 	"require": {
-		"php": ">=5.4.0"
+		"php": ">=5.4.0",
+		"imarc/opus": "dev-master",
+		"dotink/flourish-core": "dev-master"
 	},
 	"autoload": {
 		"classmap": ["src/"]
-	}
-}
+	},
+	"extra": {
+		"opus": {
+			"inkwell/framework": {
+				"plugin" : ""
+			}
+		}
+	}}

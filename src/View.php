@@ -5,7 +5,8 @@
 	use Dotink\Flourish;
 
 	/**
-	* View Class
+	* Views provide a simple object interface for data and partial aggregation as well as
+	* interfaces for making templating easier.
 	*
 	* @copyright Copyright (c) 2015, Matthew J. Sahagian
 	* @author Matthew J. Sahagian [mjs] <msahagian@dotink.org>
