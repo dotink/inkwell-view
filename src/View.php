@@ -54,6 +54,24 @@
 
 
 		/**
+		 *
+		 */
+		protected $filter = NULL;
+
+
+		/**
+		 *
+		 */
+		protected $filters = array();
+
+
+		/**
+		 *
+		 */
+		protected $format = NULL;
+
+
+		/**
 		 * The current nesting level for templates in this view
 		 *
 		 * @access protected
@@ -96,6 +114,47 @@
 
 
 		/**
+		 * Dynamically access view content by calling the view as a function
+		 *
+		 * @access public
+		 * @param string $property A parseable recursively resolved property e.g. 'object.property'
+		 * @return mixed The data resolved on the view
+		 */
+		public function __invoke($property)
+		{
+			$head  = $this;
+			$parts = !is_array($property)
+				? explode('.', $property)
+				: $property;
+
+			foreach ($parts as $part) {
+				if ($head instanceof ArrayAccess || is_array($head)) {
+					$head = isset($head[$part])
+						? $head[$part]
+						: NULL;
+
+				} elseif (is_object($head)) {
+					if (isset($head->$part)) {
+						$head = $head->$part;
+					} elseif (is_callable([$head, 'get' . $part])) {
+						$head = $head->{ 'get' . $part }();
+					} else {
+						$head = NULL;
+					}
+				}
+
+				if (!$head) {
+					break;
+				}
+			}
+
+			return ($filter = $this->filter)
+				? $filter($head)
+				: $head;
+		}
+
+
+		/**
 		 * Append a subcomponent to a given element
 		 *
 		 * The component can be a relative or absolute path minus the `.php` extension or it
@@ -128,6 +187,7 @@
 						$template  = $component;
 						$component = new self($this->root, $this->assets);
 
+						$component->format     = &$this->export('format');
 						$component->assets     = &$this->export('assets');
 						$component->components = &$this->export('components');
 						$component->data       = &$this->export('data');
@@ -200,6 +260,15 @@
 
 
 		/**
+		 *
+		 */
+		public function filter($type, $callback)
+		{
+			$this->filters[strtolower($type)] = $callback;
+		}
+
+
+		/**
 		 * Get view data with strict requirements
 		 *
 		 * Unlike accessing view data via the `ArrayAccess` interface, this method will throw
@@ -255,6 +324,7 @@
 		public function load($template, $components = array(), $data = array())
 		{
 			$this->template = $template;
+			$this->format   = strtolower(pathinfo($this->template, PATHINFO_EXTENSION));
 
 			$this->assign($components);
 			$this->set($data);
@@ -389,6 +459,7 @@
 			if ($this->level == 0) {
 				$container = new self($this->root);
 
+				$container->format     = &$this->export('format');
 				$container->assets     = &$this->export('assets');
 				$container->components = &$this->export('components');
 				$container->data       = &$this->export('data');
@@ -430,6 +501,10 @@
 				: $template;
 
 			$this->level++;
+
+			if (isset($this->filters[$this->format])) {
+				$this->filter = $this->filters[$this->format];
+			}
 
 			require $template;
 
