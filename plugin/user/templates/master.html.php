@@ -10,5 +10,5 @@
 			<?php $this->insert('content') ?>
 		</body>
 	</html>
-	<?
+	<?php
 }
