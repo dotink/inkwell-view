@@ -3,6 +3,7 @@
 	use Closure;
 	use ArrayAccess;
 	use Dotink\Flourish;
+	use ReflectionFunction;
 
 	/**
 	* Views provide a simple object interface for data and partial aggregation as well as
@@ -122,35 +123,12 @@
 		 */
 		public function __invoke($property)
 		{
-			$head  = $this;
-			$parts = !is_array($property)
-				? explode('.', $property)
-				: $property;
+			if ($property instanceof Closure) {
+				return $this->invokeClosure($property);
 
-			foreach ($parts as $part) {
-				if ($head instanceof ArrayAccess || is_array($head)) {
-					$head = isset($head[$part])
-						? $head[$part]
-						: NULL;
-
-				} elseif (is_object($head)) {
-					if (isset($head->$part)) {
-						$head = $head->$part;
-					} elseif (is_callable([$head, 'get' . $part])) {
-						$head = $head->{ 'get' . $part }();
-					} else {
-						$head = NULL;
-					}
-				}
-
-				if (!$head) {
-					break;
-				}
+			} else {
+				return $this->invokeString((string) $property);
 			}
-
-			return ($filter = $this->filter)
-				? $filter($head)
-				: $head;
 		}
 
 
@@ -532,6 +510,84 @@
 			}
 
 			return $this;
+		}
+
+
+		/**
+		 *
+		 */
+		private function invokeClosure($emitter)
+		{
+			$reflection = new ReflectionFunction($emitter);
+			$parameters = $reflection->getParameters();
+
+			switch (count($parameters)) {
+				case 0:
+					break;
+
+				case 2:
+					$value_name = $parameters[1]->getName();
+				case 1:
+					$index_name = $parameters[0]->getName();
+					break;
+
+				default:
+					throw new Flourish\ProgrammerException(
+						'Cannot pass more than 2 parameters to an invoked Closure'
+					);
+			}
+
+			return function($i, $value) use ($emitter, $value_name, $index_name) {
+				$old_value         = $this[$value_name];
+				$old_index         = $this[$index_name];
+				$this[$value_name] = $value;
+				$this[$index_name] = $i;
+
+				ob_start();
+				$emitter($i, $value);
+
+				$this[$value_name] = $old_value;
+				$this[$index_name] = $old_index;
+
+				echo ob_get_clean();
+			};
+		}
+
+
+		/**
+		 *
+		 */
+		private function invokeString($property)
+		{
+			$head  = $this;
+			$parts = !is_array($property)
+				? explode('.', $property)
+				: $property;
+
+			foreach ($parts as $part) {
+				if ($head instanceof ArrayAccess || is_array($head)) {
+					$head = isset($head[$part])
+						? $head[$part]
+						: NULL;
+
+				} elseif (is_object($head)) {
+					if (isset($head->$part)) {
+						$head = $head->$part;
+					} elseif (is_callable([$head, 'get' . $part])) {
+						$head = $head->{ 'get' . $part }();
+					} else {
+						$head = NULL;
+					}
+				}
+
+				if (!$head) {
+					break;
+				}
+			}
+
+			return ($filter = $this->filter)
+				? $filter($head)
+				: $head;
 		}
 	}
 }
