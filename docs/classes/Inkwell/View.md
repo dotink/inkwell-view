@@ -1,6 +1,5 @@
 # View
-## Views provide a simple object interface for data and partial aggregation as well as
-interfaces for making templating easier.
+## Views provide a simple object interface for data and template aggregation.
 
 _Copyright (c) 2015, Matthew J. Sahagian_.
 _Please reference the LICENSE.md file at the root of this distribution_
