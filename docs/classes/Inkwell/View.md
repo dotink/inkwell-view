@@ -225,7 +225,8 @@ such as 'user.company.name', or a closure with mappable parameters.
 			
 		<tr>
 			<td>
-									Closure				
+									<a href="http://php.net/class.closure">Closure</a>
+				
 			</td>
 		</tr>
 						
@@ -812,7 +813,8 @@ Buffer the output of a closure inside a template
 				$closure
 			</td>
 			<td>
-									Closure				
+									<a href="http://php.net/class.closure">Closure</a>
+				
 			</td>
 			<td>
 				The closure for which to buffer output
@@ -1064,7 +1066,8 @@ Wrap a closure passed to `__invoke()` in order to incorporate it's parameters as
 				$emitter
 			</td>
 			<td>
-									Closure				
+									<a href="http://php.net/class.closure">Closure</a>
+				
 			</td>
 			<td>
 				The closure to wrap
