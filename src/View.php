@@ -107,10 +107,11 @@
 		 * @param mixed $assets The asset manager for adding CSS / JSON
 		 * @return void
 		 */
-		public function __construct($root_directory, $assets = NULL)
+		public function __construct($root_directory, $assets = NULL, $filters = NULL)
 		{
 			$this->root    = $root_directory;
 			$this->assets  = $assets;
+			$this->filters = $filters;
 		}
 
 
@@ -163,12 +164,10 @@
 				foreach ($components as $component) {
 					if (!($component instanceof self)) {
 						$template  = $component;
-						$component = new self($this->root, $this->assets);
+						$component = new static($this->root, $this->assets, $this->filters);
 
-						$component->format     = &$this->export('format');
-						$component->assets     = &$this->export('assets');
-						$component->components = &$this->export('components');
-						$component->data       = &$this->export('data');
+						$component->components = $this->export('components');
+						$component->data       = $this->export('data');
 
 						$component->load($template);
 					}
@@ -207,6 +206,16 @@
 			return $this->append($element, $component);
 		}
 
+
+		/**
+		 *
+		 */
+		public function create($template, $components = array(), $data = array())
+		{
+			$view = new static($this->root, $this->assets, $this->filters);
+
+			return $view->load($template, $components, $data);
+		}
 
 		/**
 		 * Render the view to a string
@@ -435,10 +444,10 @@
 		private function expand($element, $template)
 		{
 			if ($this->level == 0) {
-				$container = new self($this->root);
+				$container = new static($this->root);
 
-				$container->format     = &$this->export('format');
 				$container->assets     = &$this->export('assets');
+				$container->filters    = &$this->export('filters');
 				$container->components = &$this->export('components');
 				$container->data       = &$this->export('data');
 
@@ -520,34 +529,34 @@
 		{
 			$reflection = new ReflectionFunction($emitter);
 			$parameters = $reflection->getParameters();
+			$data_names = array();
 
 			switch (count($parameters)) {
 				case 0:
 					break;
 
-				case 2:
-					$value_name = $parameters[1]->getName();
-				case 1:
-					$index_name = $parameters[0]->getName();
-					break;
-
 				default:
-					throw new Flourish\ProgrammerException(
-						'Cannot pass more than 2 parameters to an invoked Closure'
-					);
+					foreach ($parameters as $parameter) {
+						$data_names[] = $parameter->getName();
+					}
+					break;
 			}
 
-			return function($i, $value) use ($emitter, $value_name, $index_name) {
-				$old_value         = $this[$value_name];
-				$old_index         = $this[$index_name];
-				$this[$value_name] = $value;
-				$this[$index_name] = $i;
+			return function() use ($emitter, $data_names) {
+				$old_values = array();
+				$arguments  = func_get_args();
+
+				foreach ($data_names as $i => $data_name) {
+					$old_values[$data_name] = $this[$data_name];
+					$this[$data_name]       = $arguments[$i];
+				}
 
 				ob_start();
-				$emitter($i, $value);
+				call_user_func_array($emitter, $arguments);
 
-				$this[$value_name] = $old_value;
-				$this[$index_name] = $old_index;
+				foreach ($data_names as $data_name) {
+					$this[$data_name] = $old_values[$data_name];
+				}
 
 				echo ob_get_clean();
 			};
