@@ -298,8 +298,7 @@ data, and subcomponents of this view.
 			
 		<tr>
 			<td>
-									<a href="./">View</a>
-				
+									View				
 			</td>
 		</tr>
 						
