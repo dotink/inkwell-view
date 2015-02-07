@@ -1,5 +1,6 @@
 # View
-## View Class
+## Views provide a simple object interface for data and partial aggregation as well as
+interfaces for making templating easier.
 
 _Copyright (c) 2015, Matthew J. Sahagian_.
 _Please reference the LICENSE.md file at the root of this distribution_
@@ -30,6 +31,11 @@ _Please reference the LICENSE.md file at the root of this distribution_
 	<tr>
 		<td>Flourish</td>
 		<td>Dotink\Flourish</td>
+	</tr>
+	
+	<tr>
+		<td>ReflectionFunction</td>
+		<td>ReflectionFunction</td>
 	</tr>
 	
 </table>
@@ -68,19 +74,31 @@ Asset manager instance
 
 #### <span style="color:#6a6e3d;">$components</span>
 
-Sub-components views of this view
+Sub-components of this view
 
 #### <span style="color:#6a6e3d;">$container</span>
 
-The container view for this view.
+The container for this view.
 
 #### <span style="color:#6a6e3d;">$data</span>
 
 The view data accessible via ArrayAccess
 
+#### <span style="color:#6a6e3d;">$filter</span>
+
+The current filter, selected by format type at time of injection
+
+#### <span style="color:#6a6e3d;">$filters</span>
+
+Available filters keyed by format type
+
+#### <span style="color:#6a6e3d;">$format</span>
+
+The
+
 #### <span style="color:#6a6e3d;">$level</span>
 
-The current nesting level for templates in this view
+The current nesting level for templates in this view object
 
 #### <span style="color:#6a6e3d;">$template</span>
 
@@ -117,7 +135,7 @@ Create a new view object
 				$root_directory
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -130,11 +148,24 @@ Create a new view object
 				$assets
 			</td>
 			<td>
-									<a href="http://www.php.net/language.pseudo-types.php">mixed</a>
+									<a href="http://php.net/language.pseudo-types">mixed</a>
 				
 			</td>
 			<td>
 				The asset manager for adding CSS / JSON
+			</td>
+		</tr>
+					
+		<tr>
+			<td>
+				$filters
+			</td>
+			<td>
+									<a href="http://php.net/language.types.array">array</a>
+				
+			</td>
+			<td>
+				Array of callable filters, keyed by format type
 			</td>
 		</tr>
 			
@@ -157,6 +188,66 @@ Create a new view object
 
 <hr />
 
+#### <span style="color:#3e6a6e;">__invoke()</span>
+
+Dynamically access view content by calling the view as a function
+
+##### Details
+
+This method will resolve data via JS object syntax, generate closure wrappers with
+variable injection, and allow for filtering all data access via it.
+
+The `node` parameter should consist either of a string of resolveable data properties
+such as 'user.company.name', or a closure with mappable parameters.
+
+###### Parameters
+
+<table>
+	<thead>
+		<th>Name</th>
+		<th>Type(s)</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+			
+		<tr>
+			<td rowspan="3">
+				$node
+			</td>
+			<td>
+									<a href="http://php.net/language.types.string">string</a>
+				
+			</td>
+			<td rowspan="3">
+				A unit with resolveable data names
+			</td>
+		</tr>
+			
+		<tr>
+			<td>
+									Closure				
+			</td>
+		</tr>
+						
+	</tbody>
+</table>
+
+###### Returns
+
+<dl>
+	
+		<dt>
+			mixed
+		</dt>
+		<dd>
+			The data resolved on the view
+		</dd>
+	
+</dl>
+
+
+<hr />
+
 #### <span style="color:#3e6a6e;">append()</span>
 
 Append a subcomponent to a given element
@@ -165,8 +256,9 @@ Append a subcomponent to a given element
 
 The component can be a relative or absolute path minus the `.php` extension or it
 can be a separate view object.  If the component is an independent view object it
-will have its own asset manager, data, and subcomponent set.  If it is a template
-path it will share the asset manager, data, and subcomponents of this view.
+will have its own asset manager, filters, data, and subcomponent set.  If it is a
+template path it will share the asset manager and filters and receive a copy of the
+data, and subcomponents of this view.
 
 ###### Parameters
 
@@ -183,7 +275,7 @@ path it will share the asset manager, data, and subcomponents of this view.
 				$element
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -196,7 +288,7 @@ path it will share the asset manager, data, and subcomponents of this view.
 				$component
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td rowspan="3">
@@ -256,6 +348,78 @@ be cleared with an empty array.
 
 <hr />
 
+#### <span style="color:#3e6a6e;">create()</span>
+
+Creates a new view object which shares the root, assets, and filters of this one.
+
+###### Parameters
+
+<table>
+	<thead>
+		<th>Name</th>
+		<th>Type(s)</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+			
+		<tr>
+			<td>
+				$template
+			</td>
+			<td>
+									<a href="http://php.net/language.types.string">string</a>
+				
+			</td>
+			<td>
+				The template path relative to root or as an absolute path
+			</td>
+		</tr>
+					
+		<tr>
+			<td>
+				$data
+			</td>
+			<td>
+									<a href="http://php.net/language.types.array">array</a>
+				
+			</td>
+			<td>
+				Data array for mass assignment
+			</td>
+		</tr>
+					
+		<tr>
+			<td>
+				$component
+			</td>
+			<td>
+									<a href="http://php.net/language.types.array">array</a>
+				
+			</td>
+			<td>
+				Component array for mass assignment
+			</td>
+		</tr>
+			
+	</tbody>
+</table>
+
+###### Returns
+
+<dl>
+	
+		<dt>
+			View
+		</dt>
+		<dd>
+			A newly created view object
+		</dd>
+	
+</dl>
+
+
+<hr />
+
 #### <span style="color:#3e6a6e;">compose()</span>
 
 Render the view to a string
@@ -277,6 +441,51 @@ expand container views into a final string representation.
 		</dd>
 	
 </dl>
+
+
+<hr />
+
+#### <span style="color:#3e6a6e;">filter()</span>
+
+Add a filter for a particular format
+
+###### Parameters
+
+<table>
+	<thead>
+		<th>Name</th>
+		<th>Type(s)</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+			
+		<tr>
+			<td>
+				$format
+			</td>
+			<td>
+									<a href="http://php.net/language.types.string">string</a>
+				
+			</td>
+			<td>
+				The format type to use this filter on
+			</td>
+		</tr>
+					
+		<tr>
+			<td>
+				$callback
+			</td>
+			<td>
+									callable				
+			</td>
+			<td>
+				The filter to call
+			</td>
+		</tr>
+			
+	</tbody>
+</table>
 
 
 <hr />
@@ -306,7 +515,7 @@ a mechanism to require data be provided in a given template.
 				$key
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -319,7 +528,7 @@ a mechanism to require data be provided in a given template.
 				$default
 			</td>
 			<td>
-									<a href="http://www.php.net/language.pseudo-types.php">mixed</a>
+									<a href="http://php.net/language.pseudo-types">mixed</a>
 				
 			</td>
 			<td>
@@ -383,7 +592,7 @@ the standard `isset` style behavior.
 				$key
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -412,7 +621,7 @@ the standard `isset` style behavior.
 
 #### <span style="color:#3e6a6e;">load()</span>
 
-Load the template and optionally mass load components or data
+Load the template and optionally mass load data and components
 
 ###### Parameters
 
@@ -429,7 +638,7 @@ Load the template and optionally mass load components or data
 				$template
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -439,27 +648,27 @@ Load the template and optionally mass load components or data
 					
 		<tr>
 			<td>
-				$component
+				$data
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.array.php">array</a>
+									<a href="http://php.net/language.types.array">array</a>
 				
 			</td>
 			<td>
-				Component array for mass assignment
+				Data array for mass assignment
 			</td>
 		</tr>
 					
 		<tr>
 			<td>
-				$data
+				$component
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.array.php">array</a>
+									<a href="http://php.net/language.types.array">array</a>
 				
 			</td>
 			<td>
-				Data array for mass assignment
+				Component array for mass assignment
 			</td>
 		</tr>
 			
@@ -545,7 +754,7 @@ a mechanism to prevent certain data from being overloaded.
 				$key
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -558,7 +767,7 @@ a mechanism to prevent certain data from being overloaded.
 				$value
 			</td>
 			<td>
-									<a href="http://www.php.net/language.pseudo-types.php">mixed</a>
+									<a href="http://php.net/language.pseudo-types">mixed</a>
 				
 			</td>
 			<td>
@@ -587,7 +796,7 @@ a mechanism to prevent certain data from being overloaded.
 
 #### <span style="color:#3e6a6e;">buffer()</span>
 
-Buffer the output of an anonymous function inside a template
+Buffer the output of a closure inside a template
 
 ###### Parameters
 
@@ -632,7 +841,7 @@ Buffer the output of an anonymous function inside a template
 
 #### <span style="color:#3e6a6e;">expand()</span>
 
-Tell the view to expand a template using another from inside the template
+Tell the view to expand a template into another at a given subcomponent element
 
 ##### Details
 
@@ -655,7 +864,7 @@ full page.
 				$element
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -668,7 +877,7 @@ full page.
 				$template
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -718,7 +927,7 @@ This is mostly used internally for sharing data or components between templates.
 				$property
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -764,7 +973,7 @@ Inject a template directly from within a template
 				$template
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -810,7 +1019,7 @@ Insert subcomponents at this position
 				$element
 			</td>
 			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
+									<a href="http://php.net/language.types.string">string</a>
 				
 			</td>
 			<td>
@@ -830,6 +1039,97 @@ Insert subcomponents at this position
 		</dt>
 		<dd>
 			The called instance for method chaining
+		</dd>
+	
+</dl>
+
+
+<hr />
+
+#### <span style="color:#3e6a6e;">invokeClosure()</span>
+
+Wrap a closure passed to `__invoke()` in order to incorporate it's parameters as data
+
+###### Parameters
+
+<table>
+	<thead>
+		<th>Name</th>
+		<th>Type(s)</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+			
+		<tr>
+			<td>
+				$emitter
+			</td>
+			<td>
+									Closure				
+			</td>
+			<td>
+				The closure to wrap
+			</td>
+		</tr>
+			
+	</tbody>
+</table>
+
+###### Returns
+
+<dl>
+	
+		<dt>
+			Closure
+		</dt>
+		<dd>
+			The wrapping closure with necessary data mapping
+		</dd>
+	
+</dl>
+
+
+<hr />
+
+#### <span style="color:#3e6a6e;">invokeString()</span>
+
+Resolve a string passed to `__invoke()` in order to filter child data
+
+###### Parameters
+
+<table>
+	<thead>
+		<th>Name</th>
+		<th>Type(s)</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+			
+		<tr>
+			<td>
+				$property
+			</td>
+			<td>
+									<a href="http://php.net/language.types.string">string</a>
+				
+			</td>
+			<td>
+				The property to retrieve
+			</td>
+		</tr>
+			
+	</tbody>
+</table>
+
+###### Returns
+
+<dl>
+	
+		<dt>
+			mixed
+		</dt>
+		<dd>
+			The value of the property, filtered if need be
 		</dd>
 	
 </dl>
