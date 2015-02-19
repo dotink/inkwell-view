@@ -15,7 +15,7 @@
 	*
 	* @package Dotink\Inkwell
 	*/
-	class View implements ArrayAccess
+	class View extends Flourish\Collection implements ArrayAccess
 	{
 		/**
 		 * Asset manager instance
@@ -295,18 +295,22 @@
 		 * @return mixed The value of the data
 		 * @throws Flourish\ProgrammerException If no default is provided and no data exists
 		 */
-		public function get($key, $default = NULL)
+		public function get($key = NULL, $default = NULL)
 		{
-			if (!$this->has($key) && func_num_args() == 1) {
-				throw new Flourish\ProgrammerException(
-					'Cannot get data "%s", not set in data and no default provided.',
-					$key
-				);
+			$keys = !is_array($key)
+				? [$key]
+				: $key;
+
+			foreach ($keys as $key) {
+				if (!$this->has($key) && func_num_args() == 1) {
+					throw new Flourish\ProgrammerException(
+						'Cannot get data "%s", not set in data and no default provided.',
+						$key
+					);
+				}
 			}
 
-			return $this[$key] !== NULL
-				? $this[$key]
-				: $default;
+			return parent::get($key, $default);
 		}
 
 
@@ -322,7 +326,7 @@
 		 */
 		public function has($key)
 		{
-			return array_key_exists($key, $this->data);
+			return parent::has($key);
 		}
 
 
@@ -354,7 +358,7 @@
 		 */
 		public function offsetExists($key)
 		{
-			return isset($this->data[$key]);
+			return parent::has($key);
 		}
 
 
@@ -368,9 +372,7 @@
 		 */
 		public function offsetGet($key)
 		{
-			return isset($this->data[$key])
-				? $this->data[$key]
-				: NULL;
+			return parent::get($key, NULL);
 		}
 
 
@@ -384,11 +386,7 @@
 		 */
 		public function offsetSet($key, $value)
 		{
-			if ($value === NULL) {
-				unset($this->data[$key]);
-			} else {
-				$this->data[$key] = $value;
-			}
+			parent::set($key, $value);
 		}
 
 
@@ -399,7 +397,7 @@
 		 */
 		public function offsetUnset($key)
 		{
-			unset($this->data[$key]);
+			parent::set($key, NULL);
 		}
 
 
@@ -422,7 +420,7 @@
 				: $key;
 
 			foreach ($keys as $key => $value) {
-				if ($this->has($key)) {
+				if (parent::has($key)) {
 					throw new Flourish\ProgrammerException(
 						'Cannot set data "%s", data has already been provided.',
 						$key
@@ -603,35 +601,35 @@
 		 */
 		private function invokeString($property)
 		{
-			$head  = $this;
+			$data  = $this;
 			$parts = !is_array($property)
 				? explode('.', $property)
 				: $property;
 
 			foreach ($parts as $part) {
-				if ($head instanceof ArrayAccess || is_array($head)) {
-					$head = isset($head[$part])
-						? $head[$part]
+				if ($data instanceof ArrayAccess || is_array($data)) {
+					$data = isset($data[$part])
+						? $data[$part]
 						: NULL;
 
-				} elseif (is_object($head)) {
-					if (isset($head->$part)) {
-						$head = $head->$part;
-					} elseif (is_callable([$head, 'get' . $part])) {
-						$head = $head->{ 'get' . $part }();
+				} elseif (is_object($data)) {
+					if (isset($data->$part)) {
+						$data = $data->$part;
+					} elseif (is_callable([$data, 'get' . $part])) {
+						$data = $data->{ 'get' . $part }();
 					} else {
-						$head = NULL;
+						$data = NULL;
 					}
 				}
 
-				if (!$head) {
+				if (!$data) {
 					break;
 				}
 			}
 
 			return ($filter = $this->filter)
-				? $filter($head)
-				: $head;
+				? $filter($data)
+				: $data;
 		}
 	}
 }
