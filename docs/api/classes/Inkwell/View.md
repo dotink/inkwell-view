@@ -4,6 +4,10 @@
 _Copyright (c) 2015, Matthew J. Sahagian_.
 _Please reference the LICENSE.md file at the root of this distribution_
 
+### Extends
+
+`Flourish\Collection`
+
 #### Namespace
 
 `Inkwell`
@@ -14,7 +18,7 @@ _Please reference the LICENSE.md file at the root of this distribution_
 
 	<tr>
 		<th>Alias</th>
-		<th>Namespace / Class</th>
+		<th>Namespace / Target</th>
 	</tr>
 	
 	<tr>
@@ -728,6 +732,65 @@ Unset an offset
 
 <hr />
 
+#### <span style="color:#3e6a6e;">resolve()</span>
+
+Resolves a template path into a full path
+
+###### Parameters
+
+<table>
+	<thead>
+		<th>Name</th>
+		<th>Type(s)</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+			
+		<tr>
+			<td>
+				$template
+			</td>
+			<td>
+									<a href="http://php.net/language.types.string">string</a>
+				
+			</td>
+			<td>
+				The template to resolve, if NULL, the template passed to load()
+			</td>
+		</tr>
+			
+	</tbody>
+</table>
+
+###### Throws
+
+<dl>
+
+	<dt>
+					Flourish\NotFoundException		
+	</dt>
+	<dd>
+		If the full path is not readable
+	</dd>
+
+</dl>
+
+###### Returns
+
+<dl>
+	
+		<dt>
+			string
+		</dt>
+		<dd>
+			The full path of the template
+		</dd>
+	
+</dl>
+
+
+<hr />
+
 #### <span style="color:#3e6a6e;">set()</span>
 
 Set view data with strict requirements
@@ -1134,8 +1197,6 @@ Resolve a string passed to `__invoke()` in order to filter child data
 		</dd>
 	
 </dl>
-
-
 
 
 

@@ -402,6 +402,32 @@
 
 
 		/**
+		 * Resolves a template path into a full path
+		 *
+		 * @access public
+		 * @param string $template The template to resolve, if NULL, the template passed to load()
+		 * @return string The full path of the template
+		 * @throws Flourish\NotFoundException If the full path is not readable
+		 */
+		public function resolve($template = NULL)
+		{
+			$template  = $template ?: $this->template;
+			$full_path = !preg_match('#^(/|\\\\|[a-z]:(\\\\|/)|\\\\|//)#i', $template)
+				? $this->root . DIRECTORY_SEPARATOR . $template . '.php'
+				: $template;
+
+			if (!is_readable($full_path)) {
+				throw new Flourish\NotFoundException(
+					'Could not resolve template at "%s"',
+					$full_path
+				);
+			}
+
+			return $full_path;
+		}
+
+
+		/**
 		 * Set view data with strict requirements
 		 *
 		 * Unlike assigning view data via the `ArrayAccess` interface, this method will throw
@@ -508,17 +534,13 @@
 		 */
 		private function inject($template)
 		{
-			$template = !preg_match('#^(/|\\\\|[a-z]:(\\\\|/)|\\\\|//)#i', $template)
-				? $this->root . DIRECTORY_SEPARATOR . $template . '.php'
-				: $template;
-
 			$this->level++;
 
 			if (isset($this->filters[$this->format])) {
 				$this->filter = $this->filters[$this->format];
 			}
 
-			require $template;
+			require $this->resolve($template);
 
 			$this->level--;
 
